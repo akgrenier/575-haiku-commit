@@ -1,0 +1,83 @@
+{
+  "name": "haiku-commit",
+  "displayName": "Haiku Commit Messages",
+  "description": "Generate beautiful haiku commit messages using AI",
+  "version": "1.0.0",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Other",
+    "SCM Providers"
+  ],
+  "keywords": [
+    "git",
+    "commit",
+    "haiku",
+    "ai",
+    "poetry"
+  ],
+  "activationEvents": [
+    "onCommand:haiku-commit.generate"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "haiku-commit.generate",
+        "title": "Generate Haiku Commit Message",
+        "category": "Haiku Commit",
+        "icon": "$(edit)"
+      }
+    ],
+    "menus": {
+      "scm/title": [
+        {
+          "command": "haiku-commit.generate",
+          "group": "navigation",
+          "when": "scmProvider == git"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Haiku Commit",
+      "properties": {
+        "haikuCommit.anthropicApiKey": {
+          "type": "string",
+          "default": "",
+          "description": "Your Anthropic API key for generating haiku commit messages",
+          "markdownDescription": "Get your API key from [Anthropic Console](https://console.anthropic.com/)"
+        }
+      }
+    },
+    "keybindings": [
+      {
+        "command": "haiku-commit.generate",
+        "key": "ctrl+shift+h",
+        "mac": "cmd+shift+h",
+        "when": "scmProvider == git"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "pnpm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package",
+    "pretest": "pnpm run compile",
+    "lint": "echo 'Linting skipped'"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.80.0",
+    "@types/node": "^20.0.0",
+    "@vscode/vsce": "^3.0.0",
+    "typescript": "^5.1.0"
+  },
+  "dependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/haiku-commit.git"
+  },
+  "publisher": "yourpublisher",
+  "license": "MIT"
+}
