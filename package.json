@@ -28,6 +28,12 @@
         "title": "Generate Haiku Commit Message",
         "category": "Haiku Commit",
         "icon": "$(edit)"
+      },
+      {
+        "command": "haiku-commit.setApiKey",
+        "title": "Set Haiku API Key",
+        "category": "Haiku Commit",
+        "icon": "$(key)"
       }
     ],
     "menus": {
@@ -36,6 +42,11 @@
           "command": "haiku-commit.generate",
           "group": "navigation",
           "when": "scmProvider == git"
+        },
+        {
+          "command": "haiku-commit.setApiKey",
+          "group": "navigation@1",
+          "when": "scmProvider == git && config.haikuCommit.anthropicApiKey == ''"
         }
       ]
     },
@@ -47,6 +58,24 @@
           "default": "",
           "description": "Your Anthropic API key for generating haiku commit messages",
           "markdownDescription": "Get your API key from [Anthropic Console](https://console.anthropic.com/)"
+        },
+        "haikuCommit.strict575": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enforce exact 5-7-5 syllable counts for the haiku"
+        },
+        "haikuCommit.maxDiffLength": {
+          "type": "number",
+          "default": 4000,
+          "minimum": 500,
+          "description": "Maximum characters of the staged diff to send to the AI"
+        },
+        "haikuCommit.samples": {
+          "type": "number",
+          "default": 1,
+          "minimum": 1,
+          "maximum": 5,
+          "description": "Number of haiku options to generate and choose from"
         }
       }
     },
@@ -63,6 +92,7 @@
     "vscode:prepublish": "pnpm run compile",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
+    "dev": "pnpm run watch",
     "package": "vsce package",
     "pretest": "pnpm run compile",
     "lint": "echo 'Linting skipped'"
@@ -73,7 +103,9 @@
     "@vscode/vsce": "^3.0.0",
     "typescript": "^5.1.0"
   },
-  "dependencies": {},
+  "dependencies": {
+    "syllable": "^5.0.1"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/yourusername/haiku-commit.git"

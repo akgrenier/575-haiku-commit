@@ -15,8 +15,8 @@ Generate beautiful haiku commit messages using AI! Transform your git commits in
 ### From Source
 
 1. Clone this repository
-2. Run `npm install` to install dependencies
-3. Run `npm run compile` to build the extension
+2. Run `pnpm install` to install dependencies
+3. Run `pnpm run compile` to build the extension
 4. Press `F5` in VS Code to open a new window with the extension loaded
 
 ### Publishing to VS Code Marketplace
@@ -31,6 +31,11 @@ Generate beautiful haiku commit messages using AI! Transform your git commits in
 2. Open VS Code Settings (`Ctrl+,` or `Cmd+,`)
 3. Search for "Haiku Commit"
 4. Enter your Anthropic API key
+
+### Setting the API key via command or status bar
+
+- Command Palette: run "Haiku Commit: Set Haiku API Key" to paste your key at any time.
+- Status Bar: when no key is configured, a key icon appears ("Set Haiku API Key"). Click it to set your key.
 
 Or the extension will prompt you for your API key on first use.
 
@@ -54,6 +59,10 @@ Or the extension will prompt you for your API key on first use.
 1. Stage your changes in git
 2. Look for the haiku button in the Source Control panel title bar
 3. Click it to generate a haiku
+
+### Multiple Options (Samples)
+
+If you set `haikuCommit.samples` to a value greater than 1 (max 5), the extension will generate multiple haikus and present a selection list. Pick your favorite and it will be placed in the SCM input box.
 
 ## Example Haikus
 
@@ -85,7 +94,12 @@ Data finds its home
 
 This extension contributes the following settings:
 
-- `haikuCommit.anthropicApiKey`: Your Anthropic API key for generating haiku commit messages
+- `haikuCommit.anthropicApiKey`: Your Anthropic API key for generating haiku commit messages.
+- `haikuCommit.strict575` (default: `true`): Enforce exact 5‑7‑5 syllable counts. If the model output doesn’t match, the extension retries with corrective guidance up to two times.
+- `haikuCommit.maxDiffLength` (default: `4000`): Maximum characters of the staged diff sent to the AI. Large diffs are truncated with a marker.
+- `haikuCommit.samples` (default: `1`, min `1`, max `5`): Number of haikus to generate and choose from.
+
+When strict mode cannot be satisfied after retries, you can choose to use the best attempt, try again, or cancel.
 
 ## Project Structure
 
@@ -101,7 +115,7 @@ haiku-commit/
 ## Development
 
 1. Clone the repository
-2. Run `npm install`
+2. Run `pnpm install`
 3. Open in VS Code
 4. Press `F5` to start debugging
 5. Make changes to `src/extension.ts`
@@ -114,10 +128,12 @@ haiku-commit/
 - Large diffs are automatically truncated to stay within API limits
 - If the haiku doesn't fit, you can always generate a new one!
 
-## Known Issues
+## Troubleshooting
 
-- Very large diffs (>4000 characters) are truncated
-- Requires active internet connection for AI generation
+- No staged changes: Stage files first (e.g., `git add -p`) then rerun.
+- Missing API key: Set `haikuCommit.anthropicApiKey` in Settings or enter it when prompted.
+- Rate limits or network errors: The extension retries transient errors with a brief backoff. If failures persist, wait a moment and try again.
+- Non‑git folders: The command only works inside a git repository.
 
 ## Contributing
 

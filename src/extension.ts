@@ -1,13 +1,69 @@
 // extension.ts
 import * as vscode from 'vscode';
-import { execSync } from 'child_process';
+import { getStagedDiff } from './git/diff';
+import {
+  generateHaiku,
+  showAnthropicError,
+} from './providers/anthropicProvider';
+import {
+  generateWithValidation,
+  isStrict575,
+  normalizeHaiku,
+} from './haiku/validate';
 
 export function activate(context: vscode.ExtensionContext) {
+  // Status bar item to guide API key setup
+  const statusItem = vscode.window.createStatusBarItem(
+    vscode.StatusBarAlignment.Right,
+    100
+  );
+  statusItem.name = 'Haiku Commit';
+  statusItem.text = '$(key) Set Haiku API Key';
+  statusItem.tooltip = 'Set Anthropic API key for Haiku Commit';
+  statusItem.command = 'haiku-commit.setApiKey';
+
+  const refreshStatusItem = () => {
+    const key =
+      vscode.workspace
+        .getConfiguration('haikuCommit')
+        .get<string>('anthropicApiKey') || '';
+    if (!key) statusItem.show();
+    else statusItem.hide();
+  };
+  refreshStatusItem();
+
+  const configWatcher = vscode.workspace.onDidChangeConfiguration((e) => {
+    if (e.affectsConfiguration('haikuCommit.anthropicApiKey')) {
+      refreshStatusItem();
+    }
+  });
+
+  const setApiKeyCommand = vscode.commands.registerCommand(
+    'haiku-commit.setApiKey',
+    async () => {
+      const config = vscode.workspace.getConfiguration('haikuCommit');
+      const input = await vscode.window.showInputBox({
+        prompt: 'Enter your Anthropic API key',
+        password: true,
+        placeHolder: 'sk-ant-...',
+      });
+      if (!input) return;
+      await config.update(
+        'anthropicApiKey',
+        input,
+        vscode.ConfigurationTarget.Global
+      );
+      vscode.window.showInformationMessage('Haiku API key saved');
+      refreshStatusItem();
+    }
+  );
+
+  context.subscriptions.push(statusItem, configWatcher, setApiKeyCommand);
   let disposable = vscode.commands.registerCommand(
     'haiku-commit.generate',
     async () => {
       try {
-        // Get the workspace folder
+        // Workspace detection
         const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
         if (!workspaceFolder) {
           vscode.window.showErrorMessage('No workspace folder found');
@@ -16,149 +72,160 @@ export function activate(context: vscode.ExtensionContext) {
 
         const workspacePath = workspaceFolder.uri.fsPath;
 
-        // Check if git repo exists
+        // Settings
+        const config = vscode.workspace.getConfiguration('haikuCommit');
+        let apiKey = config.get<string>('anthropicApiKey') || '';
+        const strict575 = config.get<boolean>('strict575', true);
+        const maxDiffLength = config.get<number>('maxDiffLength', 4000);
+        const samples = Math.min(
+          5,
+          Math.max(1, config.get<number>('samples', 1))
+        );
+
+        if (!apiKey) {
+          const input = await vscode.window.showInputBox({
+            prompt: 'Enter your Anthropic API key',
+            password: true,
+            placeHolder: 'sk-ant-...',
+          });
+
+          if (input) {
+            await config.update(
+              'anthropicApiKey',
+              input,
+              vscode.ConfigurationTarget.Global
+            );
+            apiKey = input;
+          } else {
+            vscode.window.showErrorMessage(
+              'API key required to generate haiku'
+            );
+            return;
+          }
+        }
+
+        // Compute diff
+        let diff: string;
         try {
-          execSync('git rev-parse --git-dir', { cwd: workspacePath });
-        } catch {
-          vscode.window.showErrorMessage('Not a git repository');
+          diff = await getStagedDiff({
+            cwd: workspacePath,
+            maxLength: maxDiffLength,
+          });
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : String(err);
+          vscode.window.showErrorMessage(msg);
           return;
         }
 
-        // Get staged changes
-        const diff = execSync('git diff --cached', {
-          cwd: workspacePath,
-          encoding: 'utf-8',
-          maxBuffer: 1024 * 1024 * 10,
-        });
-
-        if (!diff.trim()) {
-          vscode.window.showWarningMessage(
-            'No staged changes found. Please stage your changes first.'
-          );
-          return;
-        }
-
-        // Show progress
+        // Show progress and generate
         await vscode.window.withProgress(
           {
             location: vscode.ProgressLocation.Notification,
-            title: 'Generating haiku commit message...',
+            title: 'Generating haiku commit message…',
             cancellable: false,
           },
           async () => {
-            // Generate haiku using AI
-            const haiku = await generateHaikuCommit(diff);
+            const items: { text: string; valid: boolean }[] = [];
 
-            if (haiku) {
-              // Get the Source Control API
+            for (let i = 0; i < samples; i++) {
+              try {
+                const result = await generateWithValidation(
+                  (extraInstruction?: string) =>
+                    generateHaiku(diff, { apiKey, extraInstruction }),
+                  { strict: strict575, maxRetries: 2 }
+                );
+                items.push({ text: result.text, valid: result.valid });
+              } catch (err) {
+                showAnthropicError(err);
+                return;
+              }
+            }
+
+            const insertHaiku = async (haiku: string) => {
+              const clean = normalizeHaiku(haiku);
               const gitExtension =
                 vscode.extensions.getExtension('vscode.git')?.exports;
               const git = gitExtension?.getAPI(1);
-
               if (git && git.repositories.length > 0) {
-                // Set the commit message in the Source Control input box
-                git.repositories[0].inputBox.value = haiku;
+                git.repositories[0].inputBox.value = clean;
                 vscode.window.showInformationMessage(
                   'Haiku commit message generated! 🌸'
                 );
               } else {
-                // Fallback: show the haiku in a message
                 const action = await vscode.window.showInformationMessage(
-                  `Generated Haiku:\n\n${haiku}`,
+                  `Generated Haiku:\n\n${clean}`,
                   'Copy to Clipboard'
                 );
                 if (action === 'Copy to Clipboard') {
-                  vscode.env.clipboard.writeText(haiku);
+                  vscode.env.clipboard.writeText(clean);
                 }
               }
+            };
+
+            if (samples > 1) {
+              // QuickPick between multiple options
+              const pick = await vscode.window.showQuickPick(
+                items.map((it, idx) => {
+                  const lines = it.text.split(/\r?\n/);
+                  const label = lines[0] || `Haiku ${idx + 1}`;
+                  const detail = `${lines[1] ?? ''} / ${lines[2] ?? ''}`.trim();
+                  const description = it.valid ? '5-7-5' : 'approximate';
+                  return {
+                    label,
+                    detail,
+                    description,
+                    value: it.text,
+                  } as vscode.QuickPickItem & { value: string };
+                }),
+                { placeHolder: 'Select a haiku for your commit message' }
+              );
+              if (!pick) return;
+              await insertHaiku((pick as any).value as string);
+              return;
             }
+
+            // Single sample flow
+            const only = items[0];
+            if (strict575 && !only.valid) {
+              const choice = await vscode.window.showQuickPick(
+                [
+                  { label: 'Use best attempt', value: 'use' },
+                  { label: 'Try again', value: 'retry' },
+                  { label: 'Cancel', value: 'cancel' },
+                ],
+                { placeHolder: 'Strict 5-7-5 failed after retries. What next?' }
+              );
+              if (!choice || choice.value === 'cancel') return;
+              if (choice.value === 'retry') {
+                // One more full pass
+                try {
+                  const re = await generateWithValidation(
+                    (extraInstruction?: string) =>
+                      generateHaiku(diff, { apiKey, extraInstruction }),
+                    { strict: true, maxRetries: 2 }
+                  );
+                  await insertHaiku(re.text);
+                  return;
+                } catch (err) {
+                  showAnthropicError(err);
+                  return;
+                }
+              }
+              await insertHaiku(only.text);
+              return;
+            }
+
+            await insertHaiku(only.text);
           }
         );
       } catch (error) {
-        vscode.window.showErrorMessage(`Error: ${error}`);
+        const msg = error instanceof Error ? error.message : String(error);
+        vscode.window.showErrorMessage(`Error: ${msg}`);
       }
     }
   );
 
   context.subscriptions.push(disposable);
-}
-
-interface ClaudeResponse {
-  content: Array<{
-    type: string;
-    text: string;
-  }>;
-  id: string;
-  model: string;
-  role: string;
-}
-
-async function generateHaikuCommit(diff: string): Promise<string | null> {
-  try {
-    const config = vscode.workspace.getConfiguration('haikuCommit');
-    const apiKey = config.get<string>('anthropicApiKey');
-
-    if (!apiKey) {
-      const input = await vscode.window.showInputBox({
-        prompt: 'Enter your Anthropic API key',
-        password: true,
-        placeHolder: 'sk-ant-...',
-      });
-
-      if (input) {
-        await config.update(
-          'anthropicApiKey',
-          input,
-          vscode.ConfigurationTarget.Global
-        );
-        return generateHaikuCommit(diff);
-      } else {
-        vscode.window.showErrorMessage('API key required to generate haiku');
-        return null;
-      }
-    }
-
-    // Truncate diff if too long
-    const maxDiffLength = 4000;
-    const truncatedDiff =
-      diff.length > maxDiffLength
-        ? diff.substring(0, maxDiffLength) + '\n... (truncated)'
-        : diff;
-
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 200,
-        messages: [
-          {
-            role: 'user',
-            content: `Based on this git diff, write a commit message as a haiku (5-7-5 syllable pattern).
-The haiku should capture the essence of the changes.
-Only respond with the haiku, nothing else.
-
-Git diff:
-${truncatedDiff}`,
-          },
-        ],
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`API request failed: ${response.status}`);
-    }
-
-    const data = (await response.json()) as ClaudeResponse;
-    return data.content[0].text.trim();
-  } catch (error) {
-    vscode.window.showErrorMessage(`Failed to generate haiku: ${error}`);
-    return null;
-  }
 }
 
 export function deactivate() {}
