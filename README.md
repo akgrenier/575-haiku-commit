@@ -9,6 +9,8 @@
 [![Build](https://img.shields.io/badge/ci-passing-brightgreen.svg)](#)
 [![Release](https://img.shields.io/github/v/release/akgrenier/575-haiku-commit?display_name=tag)](https://github.com/akgrenier/575-haiku-commit/releases)
 
+**Marketplace:** [AIMatey.575-haiku-commit](https://marketplace.visualstudio.com/items?itemName=AIMatey.575-haiku-commit) • **Quick Start + FAQ (pinned issue):** [view](https://github.com/akgrenier/575-haiku-commit/issues?q=%22Quick+Start+%2B+FAQ%22)
+
 Generate 5-7-5 haiku commit messages using AI! Transform your git commits into poetic works of art.
 
 ## Table of Contents
