@@ -1,0 +1,215 @@
+{
+  "name": "575-haiku-commit",
+  "displayName": "575 Haiku Commit",
+  "icon": "575-icon.png",
+  "description": "Generate 5-7-5 haiku commit messages using AI",
+  "version": "1.0.3",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Other",
+    "SCM Providers"
+  ],
+  "keywords": [
+    "git",
+    "commit",
+    "haiku",
+    "ai",
+    "poetry"
+  ],
+  "activationEvents": [
+    "workspaceContains:.git"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "haiku-commit.generate",
+        "title": "Generate Haiku Commit Message",
+        "category": "Haiku Commit",
+        "icon": "$(edit)"
+      },
+      {
+        "command": "haiku-commit.setApiKey",
+        "title": "Set Haiku API Key",
+        "category": "Haiku Commit",
+        "icon": "$(key)"
+      },
+      {
+        "command": "haiku-commit.setProvider",
+        "title": "Set Haiku Provider",
+        "category": "Haiku Commit",
+        "icon": "$(gear)"
+      },
+      {
+        "command": "haiku-commit.showLogs",
+        "title": "Show Haiku Logs",
+        "category": "Haiku Commit",
+        "icon": "$(output)"
+      },
+      {
+        "command": "haiku-commit.setModel",
+        "title": "Set Haiku Model",
+        "category": "Haiku Commit",
+        "icon": "$(symbol-parameter)"
+      }
+    ],
+    "menus": {
+      "scm/title": [
+        {
+          "command": "haiku-commit.generate",
+          "group": "navigation",
+          "when": "scmProvider == git"
+        },
+        {
+          "command": "haiku-commit.setApiKey",
+          "group": "navigation@1",
+          "when": "scmProvider == git && config.haikuCommit.provider == 'anthropic' && config.haikuCommit.anthropicApiKey == ''"
+        },
+        {
+          "command": "haiku-commit.setApiKey",
+          "group": "navigation@1",
+          "when": "scmProvider == git && config.haikuCommit.provider == 'openai' && config.haikuCommit.openaiApiKey == ''"
+        },
+        {
+          "command": "haiku-commit.setApiKey",
+          "group": "navigation@1",
+          "when": "scmProvider == git && config.haikuCommit.provider == 'gemini' && config.haikuCommit.geminiApiKey == ''"
+        },
+        {
+          "command": "haiku-commit.setModel",
+          "group": "navigation@2",
+          "when": "scmProvider == git"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "575 Haiku Commit",
+      "properties": {
+        "haikuCommit.anthropicApiKey": {
+          "type": "string",
+          "default": "",
+          "description": "Your Anthropic API key for generating haiku commit messages",
+          "markdownDescription": "Get your API key from [Anthropic Console](https://console.anthropic.com/)"
+        },
+        "haikuCommit.strict575": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enforce exact 5-7-5 syllable counts for the haiku"
+        },
+        "haikuCommit.maxDiffLength": {
+          "type": "number",
+          "default": 4000,
+          "minimum": 500,
+          "description": "Maximum characters of the staged diff to send to the AI"
+        },
+        "haikuCommit.samples": {
+          "type": "number",
+          "default": 1,
+          "minimum": 1,
+          "maximum": 5,
+          "description": "Number of haiku options to generate and choose from"
+        },
+        "haikuCommit.model": {
+          "type": "string",
+          "default": "",
+          "description": "Shared model override (advanced). Leave blank to use provider default.",
+          "markdownDescription": "Optional: set a specific model for any provider. When empty, uses provider-specific defaults (Anthropic: claude-sonnet-4-20250514; OpenAI: gpt-5-mini-2025-08-07; Gemini: gemini-2.5-flash)."
+        },
+        "haikuCommit.provider": {
+          "type": "string",
+          "enum": [
+            "anthropic",
+            "openai",
+            "gemini"
+          ],
+          "default": "",
+          "description": "AI provider to use. Leave empty to be prompted to choose."
+        },
+        "haikuCommit.maxTokens": {
+          "type": "number",
+          "default": 200,
+          "minimum": 50,
+          "description": "Maximum tokens requested from the provider for each haiku"
+        },
+        "haikuCommit.maxRetries": {
+          "type": "number",
+          "default": 2,
+          "minimum": 0,
+          "maximum": 5,
+          "description": "Maximum corrective retries when enforcing strict 5-7-5 syllables"
+        },
+        "haikuCommit.openaiApiKey": {
+          "type": "string",
+          "default": "",
+          "description": "Your OpenAI API key (set when provider=openai)",
+          "markdownDescription": "Get your API key from [OpenAI](https://platform.openai.com/account/api-keys)"
+        },
+        "haikuCommit.openaiModel": {
+          "type": "string",
+          "default": "gpt-5-mini-2025-08-07",
+          "description": "OpenAI model used when provider=openai (e.g., gpt-5-2025-08-07, gpt-5-mini-2025-08-07, gpt-5-nano-2025-08-07)"
+        },
+        "haikuCommit.geminiApiKey": {
+          "type": "string",
+          "default": "",
+          "description": "Your Google AI Studio (Gemini) API key (set when provider=gemini)",
+          "markdownDescription": "Get your API key from [AI Studio](https://aistudio.google.com/)"
+        },
+        "haikuCommit.geminiModel": {
+          "type": "string",
+          "default": "gemini-2.5-flash-preview-09-2025",
+          "description": "Gemini model used when provider=gemini (e.g., gemini-2.5-pro, gemini-2.5-flash-preview-09-2025, gemini-2.5-flash-lite-preview-09-2025)"
+        },
+        "haikuCommit.debug": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable verbose logging in the Haiku Commit output channel"
+        }
+      }
+    },
+    "keybindings": [
+      {
+        "command": "haiku-commit.generate",
+        "key": "ctrl+shift+h",
+        "mac": "cmd+shift+h",
+        "when": "scmProvider == git"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "pnpm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "dev": "pnpm run watch",
+    "package": "vsce package --no-dependencies",
+    "pretest": "pnpm run compile",
+    "lint": "echo 'Linting skipped'",
+    "lint:secrets": "node scripts/lint-secrets.mjs",
+    "release:verify": "pnpm run lint:secrets && pnpm run compile && pnpm run test:validate && pnpm run test:models",
+    "test:validate": "node scripts/test-validate.js",
+    "test:models": "node scripts/test-models.js"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.80.0",
+    "@types/node": "^20.0.0",
+    "@vscode/vsce": "^3.0.0",
+    "@secretlint/node": "^10.2.2",
+    "@secretlint/secretlint-rule-preset-recommend": "^10.2.2",
+    "secretlint": "^10.2.2",
+    "typescript": "^5.1.0"
+  },
+  "dependencies": {
+    "syllable": "^5.0.1",
+    "undici": "^5.28.4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/akgrenier/575-haiku-commit.git"
+  },
+  "homepage": "https://github.com/akgrenier/575-haiku-commit#readme",
+  "bugs": "https://github.com/akgrenier/575-haiku-commit/issues",
+  "publisher": "AIMatey",
+  "license": "MIT"
+}

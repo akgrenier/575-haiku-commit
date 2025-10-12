@@ -1,0 +1,23 @@
+.vscode/**
+.vscode-test/**
+.github/**
+
+# Exclude sources and TypeScript artifacts (ship compiled JS only)
+src/**
+**/*.ts
+**/*.tsx
+**/*.map
+**/*.tsbuildinfo
+**/tsconfig.json
+**/.eslintrc.json
+
+# Misc project files not needed in the vsix
+.gitignore
+.yarnrc
+vsc-extension-quickstart.md
+
+# Keep essential published files explicitly
+!out/**/*.js
+!README.md
+!LICENSE
+!package.json
