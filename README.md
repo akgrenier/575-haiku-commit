@@ -1,7 +1,5 @@
 # 📝 575 Haiku Commit
 
-![575 Haiku Commit hero](media/hero.jpg)
-
 [![VS Marketplace](https://img.shields.io/visual-studio-marketplace/v/AIMatey.575-haiku-commit.svg)](https://marketplace.visualstudio.com/items?itemName=AIMatey.575-haiku-commit)
 [![Installs](https://img.shields.io/visual-studio-marketplace/i/AIMatey.575-haiku-commit.svg)](https://marketplace.visualstudio.com/items?itemName=AIMatey.575-haiku-commit)
 [![Rating](https://img.shields.io/visual-studio-marketplace/r/AIMatey.575-haiku-commit.svg)](https://marketplace.visualstudio.com/items?itemName=AIMatey.575-haiku-commit)
