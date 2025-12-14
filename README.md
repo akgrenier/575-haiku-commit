@@ -1,18 +1,27 @@
 # 📝 575 Haiku Commit
+
+Generate 5‑7‑5 haiku commit messages using AI, right from VS Code’s Source Control panel. Turn everyday commits into tiny poems your team can actually skim.
+
 ![Generating from SCM](media/example.gif)
 
 [![VS Marketplace](https://img.shields.io/visual-studio-marketplace/v/AIMatey.575-haiku-commit.svg)](https://marketplace.visualstudio.com/items?itemName=AIMatey.575-haiku-commit)
-[![Installs](https://img.shields.io/visual-studio-marketplace/i/AIMatey.575-haiku-commit.svg)](https://marketplace.visualstudio.com/items?itemName=AIMatey.575-haiku-commit)
-[![Rating](https://img.shields.io/visual-studio-marketplace/r/AIMatey.575-haiku-commit.svg)](https://marketplace.visualstudio.com/items?itemName=AIMatey.575-haiku-commit)
+· [![Installs](https://img.shields.io/visual-studio-marketplace/i/AIMatey.575-haiku-commit.svg)](https://marketplace.visualstudio.com/items?itemName=AIMatey.575-haiku-commit)
+· [![Rating](https://img.shields.io/visual-studio-marketplace/r/AIMatey.575-haiku-commit.svg)](https://marketplace.visualstudio.com/items?itemName=AIMatey.575-haiku-commit)
+· [![Build](https://img.shields.io/badge/ci-passing-brightgreen.svg)](#)
+· [![Release](https://img.shields.io/github/v/release/akgrenier/575-haiku-commit?display_name=tag)](https://github.com/akgrenier/575-haiku-commit/releases)
 
-[![Build](https://img.shields.io/badge/ci-passing-brightgreen.svg)](#)
-[![Release](https://img.shields.io/github/v/release/akgrenier/575-haiku-commit?display_name=tag)](https://github.com/akgrenier/575-haiku-commit/releases)
+> **60‑second quick start (users)**  
+> 1. Install from Marketplace: `AIMatey.575-haiku-commit`  
+> 2. Run “Haiku Commit: Set Haiku Provider” and “Set Haiku API Key” once  
+> 3. Stage changes → press `Ctrl+Shift+H` / `Cmd+Shift+H` to generate your first haiku
 
-**Marketplace:** [AIMatey.575-haiku-commit](https://marketplace.visualstudio.com/items?itemName=AIMatey.575-haiku-commit) • **Quick Start + FAQ (pinned issue):** [view](https://github.com/akgrenier/575-haiku-commit/issues?q=%22Quick+Start+%2B+FAQ%22)
-
-Generate 5-7-5 haiku commit messages using AI! Transform your git commits into poetic works of art.
+> **For contributors & docs readers**  
+> Skip to [Development](#development) · [Release Prep](#release-prep) · [Learning Guides](#learning-guides)
+>
 
 ## Table of Contents
+
+**For users**
 
 - [Features](#features)
 - [Installation](#installation)
@@ -20,18 +29,26 @@ Generate 5-7-5 haiku commit messages using AI! Transform your git commits into p
 - [Usage](#usage)
 - [Requirements](#requirements)
 - [Extension Settings](#extension-settings)
+- [Tips](#tips)
 - [Troubleshooting](#troubleshooting)
 - [Privacy & Security](#privacy--security)
+- [FAQ](#faq)
+- [Gallery](#gallery)
+
+**For contributors & maintainers**
+
 - [Development](#development)
 - [Manual Validation](#manual-validation)
 - [Logging & Diagnostics](#logging--diagnostics)
 - [Release Prep](#release-prep)
 - [Learning Guides](#learning-guides)
 - [Roadmap](#roadmap)
-- [Gallery](#gallery)
+- [Contributing & Policies](#contributing--policies)
 - [Maintainers](#maintainers)
 - [Support](#support)
 - [Versioning](#versioning)
+- [License](#license)
+- [Credits](#credits)
 
 > Pull request whispers  
 > Five–seven–five logs the change  
@@ -39,11 +56,17 @@ Generate 5-7-5 haiku commit messages using AI! Transform your git commits into p
 
 ## Features
 
+575 Haiku Commit turns staged diffs into short, 5‑7‑5 commit messages that are easy to scan in history while staying fun and memorable for the team.
+
 - 🎋 Generate commit messages in traditional haiku format (5-7-5 syllables)
 - 🤖 Multiple providers: Anthropic, OpenAI GPT‑5, and Google Gemini 2.5
 - ⚡ Quick keyboard shortcut: `Ctrl+Shift+H` (or `Cmd+Shift+H` on Mac)
 - 📝 Automatically fills in the Source Control commit message box
 - 🎨 Works with any git repository
+
+## Why this exists
+
+If you already stage small, meaningful diffs, 575 Haiku Commit gives you a crisp 5‑7‑5 commit that teams remember and can skim fast, without bikeshedding over phrasing.
 
 ## Installation
 
@@ -74,23 +97,35 @@ Generate 5-7-5 haiku commit messages using AI! Transform your git commits into p
 
 Note: Do not commit `.vsix` artifacts. Keep built packages local; the CI validates builds, and releases are tracked via tags and GitHub Releases.
 
-## Why this exists
-
-You already write commits. We make them readable, memorable, and consistent. If you stage small, meaningful diffs, 575 Haiku Commit gives you a crisp 5‑7‑5 commit that teams remember and can skim fast. Ideal for solo builders and teams that want consistent narrative commits without bikeshedding.
-
 ## Setup
 
-1. Choose a provider in Settings (`haikuCommit.provider`): `anthropic`, `openai`, or `gemini`. If unset, the extension will prompt you to choose one on first use.
+1. Choose a provider in Settings (`haikuCommit.provider`): `anthropic`, `openai`, or `gemini`. If unset, the extension will prompt you on first use.
 2. Get an API key for the selected provider:
-   - Anthropic: [Anthropic Console](https://console.anthropic.com/)
-   - OpenAI: [OpenAI API Keys](https://platform.openai.com/account/api-keys)
-   - Gemini: [Google AI Studio](https://aistudio.google.com/)
-3. Open VS Code Settings (`Ctrl+,` or `Cmd+,`)
-4. Search for "Haiku Commit"
-5. Enter the matching API key (the “Set Haiku API Key” command prompts for the right one)
+   - Anthropic → [Anthropic Console](https://console.anthropic.com/)
+   - OpenAI → [OpenAI API Keys](https://platform.openai.com/account/api-keys)
+   - Gemini → [Google AI Studio](https://aistudio.google.com/)
+3. Open VS Code Settings (`Ctrl+,` or `Cmd+,`) and search for “Haiku Commit”.
+4. Either:
+   - Enter the key in the matching setting (`haikuCommit.anthropicApiKey`, `haikuCommit.openaiApiKey`, or `haikuCommit.geminiApiKey`), **or**
+   - Run “Haiku Commit: Set Haiku API Key” and paste your key when prompted.
 
-<details>
-  <summary><strong>More setup details</strong> — API key, provider, model</summary>
+The extension will prompt you on first use if a provider or key is missing, so you can also just install, run, and follow the prompts.
+
+## Requirements
+
+- VS Code 1.80.0 or higher
+- A git repository
+- An API key for the provider you select in [`haikuCommit.provider`](#setup)
+
+## Troubleshooting
+
+- **No staged changes** → Stage files first (for example `git add -p`) and rerun.
+- **Missing API key or provider** → Run:
+  - “Haiku Commit: Set Haiku Provider”
+  - “Haiku Commit: Set Haiku API Key”
+- **Rate limits or network errors** → The extension retries transient errors with a brief backoff. If failures persist, wait a moment and try again.
+- **Non‑git folders** → Commands only work inside a git repository.
+- **Need more detail?** → See [Logging & Diagnostics](#logging--diagnostics).
 
 ### Setting the API key via command or status bar
 
@@ -144,6 +179,8 @@ Or the extension will prompt you for your API key on first use.
 
 ## Usage
 
+All methods assume you already have a provider + API key set up (see [Setup](#setup)) and that your changes are staged in git.
+
 ### Method 1: Keyboard Shortcut
 
 1. Stage your changes in git
@@ -178,7 +215,7 @@ If you set `haikuCommit.samples` to a value greater than 1 (max 5), the extensio
 
 ## Extension Settings
 
-Configurable: provider, model, strict 5‑7‑5, samples, token and retry limits.
+Core settings include provider, model, strict 5‑7‑5 enforcement, number of samples, and token / retry limits. See VS Code Settings → “Haiku Commit” for the full list.
 
 <details>
   <summary><strong>See all settings</strong></summary>
@@ -288,6 +325,8 @@ Every guide will ship with a matching issue template so contributors can add tut
 - View → Output → select "Haiku Commit" to see logs, or run "Haiku Commit: Show Logs" from the Command Palette.
 
 ## Privacy & Security
+
+This extension is designed to keep everything local except the minimum required to generate a haiku.
 
 - Your API key for the selected provider is stored in VS Code Settings on your machine (one of `haikuCommit.anthropicApiKey`, `haikuCommit.openaiApiKey`, or `haikuCommit.geminiApiKey`). It is not committed to this repository.
 - The extension sends your staged git diff to the selected provider’s API (Anthropic, OpenAI, or Gemini) for haiku generation. No other data is transmitted.
