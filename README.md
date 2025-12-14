@@ -1,4 +1,5 @@
 # 📝 575 Haiku Commit
+![Generating from SCM](media/example.gif)
 
 [![VS Marketplace](https://img.shields.io/visual-studio-marketplace/v/AIMatey.575-haiku-commit.svg)](https://marketplace.visualstudio.com/items?itemName=AIMatey.575-haiku-commit)
 [![Installs](https://img.shields.io/visual-studio-marketplace/i/AIMatey.575-haiku-commit.svg)](https://marketplace.visualstudio.com/items?itemName=AIMatey.575-haiku-commit)
@@ -43,8 +44,6 @@ Generate 5-7-5 haiku commit messages using AI! Transform your git commits into p
 - ⚡ Quick keyboard shortcut: `Ctrl+Shift+H` (or `Cmd+Shift+H` on Mac)
 - 📝 Automatically fills in the Source Control commit message box
 - 🎨 Works with any git repository
-
-![Generating from SCM](media/example.gif)
 
 ## Installation
 
