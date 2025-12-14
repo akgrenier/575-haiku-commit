@@ -1,4 +1,5 @@
-# 📝 575 Haiku Commit
+[![Haiky Commit](575-icon.png)
+# 📝 575 Haiku Commit 
 
 Generate 5‑7‑5 haiku commit messages using AI, right from VS Code’s Source Control panel. Turn everyday commits into tiny poems your team can actually skim.
 
@@ -16,6 +17,8 @@ This repo is also a **cloneable blueprint for building a real VS Code extension*
 > 1. Install from Marketplace: `AIMatey.575-haiku-commit`  
 > 2. Run “Haiku Commit: Set Haiku Provider” and “Set Haiku API Key” once  
 > 3. Stage changes → press `Ctrl+Shift+H` / `Cmd+Shift+H` to generate your first haiku
+>
+> **Want to build your own extension from this repo?** Start with [Guide 00 — Template this repo](docs/guides/00-template-this-repo.md).
 
 > **For contributors & docs readers**  
 > Start here: [Development](docs/DEVELOPMENT.md) · [Release Prep](docs/RELEASE_PREP.md) · [Learning Guides](docs/GUIDES.md) (start with [Guide 00 — Template this repo](docs/guides/00-template-this-repo.md))
