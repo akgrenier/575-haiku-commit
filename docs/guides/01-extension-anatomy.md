@@ -40,6 +40,34 @@ If you can find these three pieces in any extension repo, you can usually unders
 - `out/`: compiled output from TypeScript
   - **Do not edit**; always change `src/` and rebuild.
 
+## Copy this pattern (minimal extension skeleton)
+
+If you’re replicating this repo’s structure, this is the smallest viable shape:
+
+```json
+{
+  "name": "my-extension",
+  "publisher": "yourPublisher",
+  "main": "./out/extension.js",
+  "activationEvents": ["onCommand:myext.hello"],
+  "contributes": {
+    "commands": [{ "command": "myext.hello", "title": "Hello" }]
+  }
+}
+```
+
+```ts
+import * as vscode from 'vscode';
+
+export function activate(context: vscode.ExtensionContext) {
+  context.subscriptions.push(
+    vscode.commands.registerCommand('myext.hello', () => {
+      vscode.window.showInformationMessage('Hello from my extension');
+    })
+  );
+}
+```
+
 ## How VS Code loads this extension
 
 VS Code loads extensions based on **activation events** and the manifest’s entrypoint.
@@ -124,6 +152,21 @@ If you’re replicating this repo for your own extension, keep these boundaries:
 1. In `package.json`, copy the command id for generation: `haiku-commit.generate`
 2. In `src/extension.ts`, search that exact string and confirm it’s registered via `vscode.commands.registerCommand(...)`.
 3. Press `F5`, then open Command Palette and run **Generate Haiku Commit Message**.
+
+## FAQ (common confusion)
+
+- **Why does `out/` exist at all?**
+  - VS Code runs JavaScript. `out/` is the compiled output that gets shipped.
+- **Should `out/` be committed?**
+  - For many extensions, yes (it’s the runtime artifact). But you still only edit `src/`.
+- **Where do “commands/settings/menus” come from?**
+  - `package.json` contributions are the manifest. `src/extension.ts` is the runtime wiring.
+
+## Further reading
+
+- VS Code docs: Extension Anatomy — `https://code.visualstudio.com/api/get-started/extension-anatomy`
+- VS Code docs: Contribution Points — `https://code.visualstudio.com/api/references/contribution-points`
+- VS Code samples: `microsoft/vscode-extension-samples` — `https://github.com/microsoft/vscode-extension-samples`
 
 ## Next guide
 

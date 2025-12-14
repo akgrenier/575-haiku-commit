@@ -37,6 +37,30 @@ Open `package.json` and find `contributes.configuration.properties`. You’ll se
 - `haikuCommit.debug`
 - and (currently) API keys like `haikuCommit.openaiApiKey`
 
+## Copy this pattern (settings + change watcher)
+
+```ts
+import * as vscode from 'vscode';
+
+const section = 'myExt';
+
+export function getSettings() {
+  const cfg = vscode.workspace.getConfiguration(section);
+  return {
+    enabled: cfg.get<boolean>('enabled', true),
+    mode: cfg.get<string>('mode', 'default'),
+  };
+}
+
+export function watchSettings(onChange: () => void) {
+  return vscode.workspace.onDidChangeConfiguration((e) => {
+    if (e.affectsConfiguration(`${section}.enabled`) || e.affectsConfiguration(`${section}.mode`)) {
+      onChange();
+    }
+  });
+}
+```
+
 ### 2) Read settings at runtime
 
 In code, you typically read via:
@@ -109,6 +133,37 @@ That’s simple, and it works — but for a “teach people to build extensions�
 - **Best practice is `SecretStorage`.**
 
 The rest of this guide shows the “right” implementation pattern you can copy into your own extension (and a clean migration strategy if you already shipped a settings-based key).
+
+## Copy this pattern (SecretStorage + migration)
+
+```ts
+import * as vscode from 'vscode';
+
+const section = 'myExt';
+const secretKey = (provider: string) => `${section}.apiKey.${provider}`;
+
+export async function getApiKey(ctx: vscode.ExtensionContext, provider: string) {
+  return await ctx.secrets.get(secretKey(provider));
+}
+
+export async function setApiKey(ctx: vscode.ExtensionContext, provider: string, value: string) {
+  await ctx.secrets.store(secretKey(provider), value);
+}
+
+export async function migrateApiKeyFromSettings(
+  ctx: vscode.ExtensionContext,
+  provider: string,
+  oldSettingKey: string
+) {
+  const cfg = vscode.workspace.getConfiguration(section);
+  const old = (cfg.get<string>(oldSettingKey) || '').trim();
+  const existing = await getApiKey(ctx, provider);
+  if (old && !existing) {
+    await setApiKey(ctx, provider, old);
+    await cfg.update(oldSettingKey, '', vscode.ConfigurationTarget.Global);
+  }
+}
+```
 
 ## Try it (repo exercise)
 
@@ -219,5 +274,20 @@ If you want the next guide to build naturally after settings/secrets, a great fo
 
 - **SCM integration end-to-end**: Source Control input box, SCM toolbar buttons, multi-repo handling, and UX polish.
   - [`docs/guides/04-scm-integration.md`](./04-scm-integration.md)
+
+## FAQ (secrets + settings gotchas)
+
+- **Where are secrets stored?**
+  - In VS Code’s OS-backed secret store (platform-dependent). Extensions access it via `context.secrets`.
+- **Will secrets sync via Settings Sync?**
+  - Settings can sync; SecretStorage is not “just a setting value”. Treat it as sensitive and don’t assume it syncs the same way.
+- **How do I let users clear a key?**
+  - Provide a command that calls `context.secrets.delete(...)` (or prompt them to clear the setting if you’re still settings-based).
+
+## Further reading
+
+- VS Code docs: Contribution Points (Configuration) — `https://code.visualstudio.com/api/references/contribution-points`
+- VS Code API reference: `ExtensionContext.secrets` / `SecretStorage` — `https://code.visualstudio.com/api/references/vscode-api`
+- VS Code samples: `microsoft/vscode-extension-samples` — `https://github.com/microsoft/vscode-extension-samples`
 
 

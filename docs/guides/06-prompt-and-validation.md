@@ -36,6 +36,14 @@ When you’re doing UX automation (writing to the SCM commit box), you need outp
 
 Your prompt is step 1. But prompts are not enforcement — which leads to validation.
 
+### In this repo: the exact prompt pieces
+
+Open:
+
+- `src/prompt/haiku.ts`
+  - `BASE_INSTRUCTION` is the contract (“Strict 5-7-5… Exactly 3 lines… No extra text…”)
+  - `buildUserPrompt(diff, extraInstruction?)` appends the staged diff and optionally a corrective instruction
+
 ## Part B — Normalize first (reduce variance before validating)
 
 Before validating, normalize. This repo does:
@@ -76,6 +84,12 @@ If your extension behavior depends on the output shape (it does), you need a det
 - is testable
 - fails loudly in logs
 
+### In this repo: where validation is invoked
+
+Open `src/extension.ts` and search for:
+
+- `generateWithValidation(` — that’s where provider output gets checked and corrective retries happen.
+
 ## Part D — Corrective retries (the “ask again, smarter” loop)
 
 The core loop is `generateWithValidation()` in `src/haiku/validate.ts`.
@@ -95,6 +109,34 @@ Key design choices to copy:
 - **bounded retries** (no infinite loops)
 - **clear corrective instruction** (it references the failure)
 - returns `{ text, valid, attempts }` so UX can decide what to do next
+
+## Copy this pattern (normalize → validate → corrective retry)
+
+```ts
+export async function generateWithConstraintRetries(
+  generate: (extraInstruction?: string) => Promise<string>,
+  opts: { strict: boolean; maxRetries: number }
+) {
+  const corrective =
+    'Your last output failed the constraint. Output exactly the required format. No extra text.';
+
+  let attempts = 1;
+  let text = normalize(await generate());
+  let valid = validate(text);
+
+  if (!opts.strict) return { text, valid, attempts };
+  if (valid) return { text, valid: true, attempts };
+
+  for (let i = 0; i < opts.maxRetries; i++) {
+    attempts++;
+    text = normalize(await generate(corrective));
+    valid = validate(text);
+    if (valid) return { text, valid: true, attempts };
+  }
+
+  return { text, valid: false, attempts };
+}
+```
 
 ## Part E — Tests (validate without needing the model)
 
@@ -118,6 +160,32 @@ If you replicate this pattern in your extension:
 - add a table of inputs/expected outputs for `normalize*` helpers
 - add explicit validators for “wrong shape” cases
 - if you have a parser, fuzz it (malformed JSON, missing fields, etc.)
+
+## Try it (repo exercise)
+
+1. Run the validator smoke test:
+
+```bash
+pnpm run test:validate
+```
+
+2. Open `src/haiku/validate.ts` and temporarily change `normalizeHaiku()` to *not* slice to 3 lines.
+3. Re-run `pnpm run test:validate` and observe the failure.
+4. Revert your change.
+
+## FAQ (constraints + tests)
+
+- **Why not just “trust the model”?**
+  - Because you’re shipping UX automation. A single extra line/preamble breaks the UX.
+- **What if syllable counting is wrong?**
+  - It sometimes will be (language is messy). The point is deterministic enforcement; tune the validator over time.
+- **Why does `normalizeHaiku()` slice to 3 lines?**
+  - Because “exactly 3 lines” is part of the product contract. Normalize toward the contract, then validate.
+
+## Further reading
+
+- Promptfoo: deterministic metrics for LLM validation — `https://www.promptfoo.dev/`
+- Helicone: testing prompts — `https://www.helicone.ai/blog/`
 
 ## “Steal this architecture” checklist
 

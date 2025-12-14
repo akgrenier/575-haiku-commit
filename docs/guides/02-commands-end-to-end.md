@@ -20,6 +20,34 @@ In `package.json`, VS Code reads:
 
 Think of `package.json` as your extension’s **public API**.
 
+## Copy this pattern (command wiring)
+
+Minimal “manifest → activation → runtime registration” you can paste into a new repo:
+
+```json
+{
+  "activationEvents": ["onCommand:myext.doThing"],
+  "contributes": {
+    "commands": [{ "command": "myext.doThing", "title": "Do Thing" }],
+    "keybindings": [
+      { "command": "myext.doThing", "key": "ctrl+alt+d", "when": "editorTextFocus" }
+    ]
+  }
+}
+```
+
+```ts
+import * as vscode from 'vscode';
+
+export function activate(ctx: vscode.ExtensionContext) {
+  ctx.subscriptions.push(
+    vscode.commands.registerCommand('myext.doThing', async () => {
+      vscode.window.showInformationMessage('Did the thing');
+    })
+  );
+}
+```
+
 ### Common failure modes
 
 - **The id mismatches code** (typo differences between `package.json` and `registerCommand()`).
@@ -127,6 +155,21 @@ When “it doesn’t show up” or “it doesn’t run”, check in this order:
 2. Confirm the Command Palette displays the new title.
 3. Now break it on purpose: change the command id in `package.json` but do **not** change `src/extension.ts`.
 4. Reload and observe: the command shows up, but fails at runtime — that’s the manifest/runtime mismatch this guide is trying to inoculate you against.
+
+## FAQ (what people Google at 2am)
+
+- **“Command not found”**
+  - Usually: contributed in `package.json`, but not registered in `activate()`, or activation never fired.
+- **My command doesn’t appear in the Command Palette**
+  - Usually: it’s missing from `contributes.commands`, or the title/category is wrong.
+- **Why does this repo use `workspaceContains:.git` instead of `onCommand:`?**
+  - SCM-centric UX. It trades a bit of startup cost for “always available” integration in git workspaces.
+
+## Further reading
+
+- VS Code docs: Commands — `https://code.visualstudio.com/api/extension-guides/command`
+- VS Code docs: Activation Events — `https://code.visualstudio.com/api/references/activation-events`
+- VS Code docs: Contribution Points — `https://code.visualstudio.com/api/references/contribution-points`
 
 ## “Steal this for your extension”
 

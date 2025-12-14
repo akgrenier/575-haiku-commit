@@ -47,6 +47,24 @@ You can attach a keybinding that only works when Git SCM is active:
 
 That prevents global shortcut collisions and keeps behavior predictable.
 
+## Copy this pattern (SCM title button + scoped keybinding)
+
+```json
+{
+  "contributes": {
+    "commands": [{ "command": "myext.generate", "title": "Generate Message" }],
+    "menus": {
+      "scm/title": [
+        { "command": "myext.generate", "group": "navigation", "when": "scmProvider == git" }
+      ]
+    },
+    "keybindings": [
+      { "command": "myext.generate", "key": "ctrl+shift+h", "when": "scmProvider == git" }
+    ]
+  }
+}
+```
+
 ## Part C — Get access to the Git repositories (runtime)
 
 VS Code exposes Git integration via the built-in Git extension:
@@ -103,6 +121,23 @@ In `src/extension.ts`, search for:
 
 - `repoForInsert.inputBox.value = clean;`
 
+## Copy this pattern (write to the SCM commit input box)
+
+```ts
+import * as vscode from 'vscode';
+
+export function getGitApi() {
+  const gitExt = vscode.extensions.getExtension<any>('vscode.git');
+  return gitExt?.exports?.getAPI?.(1);
+}
+
+export function writeCommitMessage(gitApi: any, message: string) {
+  const repo = gitApi?.repositories?.[0];
+  if (repo?.inputBox) repo.inputBox.value = message;
+  else vscode.env.clipboard.writeText(message);
+}
+```
+
 ### Fallback behavior (when Git API isn’t available)
 
 Good extensions degrade gracefully. This repo falls back to:
@@ -142,6 +177,21 @@ This matters because:
    - Click the **Generate Haiku Commit Message** button (SCM title bar), or press `Cmd/Ctrl+Shift+H`.
 3. Confirm the haiku appears directly in the SCM commit message box.
 4. Optional: open a multi-root workspace with 2 git repos and watch the repo selection QuickPick appear once (then get remembered).
+
+## FAQ (SCM integration gotchas)
+
+- **Why doesn’t my SCM title button show?**
+  - Your `when` clause is false (not `scmProvider == git`), or the command id isn’t contributed correctly.
+- **Why is `vscode.git` undefined?**
+  - Git extension disabled/unavailable. Always have a fallback path.
+- **How do I target the “right” repo in multi-root workspaces?**
+  - Prompt once (QuickPick), remember selection (workspaceState), reuse automatically.
+
+## Further reading
+
+- VS Code docs: Source Control API — `https://code.visualstudio.com/api/extension-guides/scm-provider`
+- VS Code docs: Contribution Points — `https://code.visualstudio.com/api/references/contribution-points`
+- VS Code samples: `microsoft/vscode-extension-samples` — `https://github.com/microsoft/vscode-extension-samples`
 
 ## Next guide
 

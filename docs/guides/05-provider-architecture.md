@@ -32,6 +32,41 @@ That’s the “provider contract”.
 
 This is the key win: **`extension.ts` doesn’t care which provider is used.**
 
+## Copy this pattern (provider registry)
+
+This is the essence of what `src/providers/registry.ts` + `src/providers/index.ts` are doing:
+
+```ts
+export type ProviderName = 'a' | 'b';
+
+export type ProviderFn = (input: string, extraInstruction?: string) => Promise<string>;
+
+export type ProviderBuilder = (opts: {
+  apiKey: string;
+  model?: string;
+  maxTokens?: number;
+  signal?: AbortSignal;
+  logger?: { debug: (s: string) => void; warn: (s: string) => void; error: (s: string) => void };
+}) => ProviderFn;
+
+const registry: Record<ProviderName, ProviderBuilder> = {
+  a: (opts) => async (input, extra) => {
+    // call Provider A using opts + input + extra
+    return '...';
+  },
+  b: (opts) => async (input, extra) => {
+    // call Provider B using opts + input + extra
+    return '...';
+  },
+};
+
+export function getProvider(name: ProviderName, opts: Parameters<ProviderBuilder>[0]): ProviderFn {
+  const builder = registry[name];
+  if (!builder) throw new Error(`Provider "${name}" not implemented`);
+  return builder(opts);
+}
+```
+
 ### 3) `getProvider()` is the single import surface
 
 `src/providers/index.ts` exposes `getProvider(opts)`:
@@ -179,5 +214,11 @@ Two natural follow-ups:
 - **Prompt + validation** (deterministic constraints + corrective retries)
   - [`docs/guides/06-prompt-and-validation.md`](./06-prompt-and-validation.md)
 - **Diagnostics** (output channel patterns, debug flags, redaction rules)
+
+## Further reading
+
+- Anthropic Messages API — `https://docs.anthropic.com/`
+- OpenAI Responses API — `https://platform.openai.com/docs/`
+- Gemini API — `https://ai.google.dev/`
 
 

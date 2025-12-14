@@ -2,6 +2,8 @@
 
 Generate 5‑7‑5 haiku commit messages using AI, right from VS Code’s Source Control panel. Turn everyday commits into tiny poems your team can actually skim.
 
+This repo is also a **cloneable blueprint for building a real VS Code extension**: commands, SCM integration, settings, providers, retries, prompts, validation, and release hygiene. Start with [`docs/guides/00-template-this-repo.md`](docs/guides/00-template-this-repo.md).
+
 ![Generating from SCM](media/example.gif)
 
 [![VS Marketplace](https://img.shields.io/visual-studio-marketplace/v/AIMatey.575-haiku-commit.svg)](https://marketplace.visualstudio.com/items?itemName=AIMatey.575-haiku-commit)
@@ -16,7 +18,7 @@ Generate 5‑7‑5 haiku commit messages using AI, right from VS Code’s Source
 > 3. Stage changes → press `Ctrl+Shift+H` / `Cmd+Shift+H` to generate your first haiku
 
 > **For contributors & docs readers**  
-> Start here: [Development](docs/DEVELOPMENT.md) · [Release Prep](docs/RELEASE_PREP.md) · [Learning Guides](docs/GUIDES.md)
+> Start here: [Development](docs/DEVELOPMENT.md) · [Release Prep](docs/RELEASE_PREP.md) · [Learning Guides](docs/GUIDES.md) (start with [Guide 00 — Template this repo](docs/guides/00-template-this-repo.md))
 >
 
 ## Table of Contents
@@ -61,10 +63,13 @@ Generate 5‑7‑5 haiku commit messages using AI, right from VS Code’s Source
 - ⚡ Quick keyboard shortcut: `Ctrl+Shift+H` (or `Cmd+Shift+H` on Mac)
 - 📝 Automatically fills in the Source Control commit message box
 - 🎨 Works with any git repository
+- 📚 Blueprint repo: step-by-step learning guides for building VS Code extensions like this one (`docs/GUIDES.md`, start with Guide 00)
 
 ## Why this exists
 
 If you already stage small, meaningful diffs, 575 Haiku Commit gives you a crisp 5‑7‑5 commit that teams remember and can skim fast, without bikeshedding over phrasing.
+
+Separately (and honestly: just as importantly), this repo is meant to be a **teachable reference implementation**. If you want to learn by cloning a production-ish extension and reshaping it into your own, start at [`docs/GUIDES.md`](docs/GUIDES.md) and follow the “template this repo” path.
 
 ## Installation
 
@@ -227,7 +232,7 @@ Maintainer-only depth lives in `/docs` so the README can stay user-first:
 
 - Development, manual validation, diagnostics: [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md)
 - Release checklist (packaging/publishing/tagging): [`docs/RELEASE_PREP.md`](docs/RELEASE_PREP.md)
-- Learning guides hub: [`docs/GUIDES.md`](docs/GUIDES.md)
+- Learning guides hub (repo-as-blueprint): [`docs/GUIDES.md`](docs/GUIDES.md) — start with [`docs/guides/00-template-this-repo.md`](docs/guides/00-template-this-repo.md)
 
 ## Release Prep
 
@@ -236,7 +241,11 @@ Maintainer-only depth lives in `/docs` so the README can stay user-first:
 
 ## Learning Guides
 
-We keep longer-form guides focused on **how to build VS Code extensions like this one** in [`docs/GUIDES.md`](docs/GUIDES.md) (and future guides under `docs/guides/`).
+We keep longer-form guides focused on **how to build VS Code extensions like this repo** in [`docs/GUIDES.md`](docs/GUIDES.md).
+
+If you’re here to learn/replicate (not just use the haiku generator), start with:
+
+- **Guide 00 — Template this repo into your VS Code extension:** [`docs/guides/00-template-this-repo.md`](docs/guides/00-template-this-repo.md)
 
 ## Tips
 
