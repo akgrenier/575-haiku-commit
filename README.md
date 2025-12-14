@@ -116,6 +116,9 @@ The extension will prompt you on first use if a provider or key is missing, so y
 - VS Code 1.80.0 or higher
 - A git repository
 - An API key for the provider you select in [`haikuCommit.provider`](#setup)
+  - Anthropic when `provider=anthropic`
+  - OpenAI when `provider=openai`
+  - Gemini when `provider=gemini`
 
 ## Troubleshooting
 
@@ -203,15 +206,6 @@ All methods assume you already have a provider + API key set up (see [Setup](#se
 ### Multiple Options (Samples)
 
 If you set `haikuCommit.samples` to a value greater than 1 (max 5), the extension will generate multiple haikus and present a selection list. Pick your favorite and it will be placed in the SCM input box.
-
-## Requirements
-
-- VS Code 1.80.0 or higher
-- Git repository
-- API key for your selected provider:
-  - Anthropic when `provider=anthropic`
-  - OpenAI when `provider=openai`
-  - Gemini when `provider=gemini`
 
 ## Extension Settings
 
@@ -316,10 +310,7 @@ Every guide will ship with a matching issue template so contributors can add tut
 ## Troubleshooting
 
 - No staged changes: Stage files first (e.g., `git add -p`) then rerun.
-- Missing API key: Run "Haiku Commit: Set Haiku API Key" or set the provider-specific setting:
-  - `haikuCommit.anthropicApiKey` (when provider = `anthropic`)
-  - `haikuCommit.openaiApiKey` (when provider = `openai`)
-  - `haikuCommit.geminiApiKey` (when provider = `gemini`)
+- Missing API key: Run "Haiku Commit: Set Haiku API Key" 
 - Rate limits or network errors: The extension retries transient errors with a brief backoff. If failures persist, wait a moment and try again.
 - Non‑git folders: The command only works inside a git repository.
 - View → Output → select "Haiku Commit" to see logs, or run "Haiku Commit: Show Logs" from the Command Palette.
