@@ -1,5 +1,7 @@
 
-<img align="left" width="85" height="85" src="haiku-commit.png" alt="Haiku Commit logo"> # 📝 575 Haiku Commit 
+<img align="left" width="85" height="85" src="haiku-commit.png" alt="Haiku Commit logo"> 
+
+# 📝 575 Haiku Commit 
 
 Generate 5‑7‑5 haiku commit messages using AI, right from VS Code’s Source Control panel. Turn everyday commits into tiny poems your team can actually skim.
 
