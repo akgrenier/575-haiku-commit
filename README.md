@@ -16,7 +16,7 @@ Generate 5‑7‑5 haiku commit messages using AI, right from VS Code’s Source
 > 3. Stage changes → press `Ctrl+Shift+H` / `Cmd+Shift+H` to generate your first haiku
 
 > **For contributors & docs readers**  
-> Skip to [Development](#development) · [Release Prep](#release-prep) · [Learning Guides](#learning-guides)
+> Start here: [Development](docs/DEVELOPMENT.md) · [Release Prep](docs/RELEASE_PREP.md) · [Learning Guides](docs/GUIDES.md)
 >
 
 ## Table of Contents
@@ -37,9 +37,7 @@ Generate 5‑7‑5 haiku commit messages using AI, right from VS Code’s Source
 
 **For contributors & maintainers**
 
-- [Development](#development)
-- [Manual Validation](#manual-validation)
-- [Logging & Diagnostics](#logging--diagnostics)
+- [Developer docs](#developer-docs)
 - [Release Prep](#release-prep)
 - [Learning Guides](#learning-guides)
 - [Roadmap](#roadmap)
@@ -74,28 +72,7 @@ If you already stage small, meaningful diffs, 575 Haiku Commit gives you a crisp
 
 - Install from the VS Code Marketplace: [575 Haiku Commit](https://marketplace.visualstudio.com/items?itemName=AIMatey.575-haiku-commit)
 - Or via CLI: `code --install-extension AIMatey.575-haiku-commit`
-
-### From Source
-
-1. Clone this repository
-2. Run `pnpm install` to install dependencies
-3. Run `pnpm run compile` to build the extension
-4. Press `F5` in VS Code to open a new window with the extension loaded
-
-#### Success check
-
-- Open Command Palette → type "Haiku Commit" → you should see:
-  - "Generate Haiku Commit Message"
-  - "Set Haiku Provider"
-  - "Set Haiku API Key"
-
-### Publishing to VS Code Marketplace
-
-1. Install `vsce`: `npm install -g @vscode/vsce`
-2. Package the extension: `vsce package`
-3. Publish: `vsce publish`
-
-Note: Do not commit `.vsix` artifacts. Keep built packages local; the CI validates builds, and releases are tracked via tags and GitHub Releases.
+- Building/running from source? See [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md).
 
 ## Setup
 
@@ -128,7 +105,7 @@ The extension will prompt you on first use if a provider or key is missing, so y
   - “Haiku Commit: Set Haiku API Key”
 - **Rate limits or network errors** → The extension retries transient errors with a brief backoff. If failures persist, wait a moment and try again.
 - **Non‑git folders** → Commands only work inside a git repository.
-- **Need more detail?** → See [Logging & Diagnostics](#logging--diagnostics).
+- **Need logs?** → View → Output → select “Haiku Commit”, or run “Haiku Commit: Show Logs”.
 
 ### Setting the API key via command or status bar
 
@@ -174,8 +151,6 @@ Notes
 
 - The dropdown shows these curated models per provider and can be updated in `src/providers/models.catalog.ts`.
 - You can still enter any valid model id via the “Custom…” option.
-</details>
-
 </details>
 
 Or the extension will prompt you for your API key on first use.
@@ -232,16 +207,6 @@ Core settings include provider, model, strict 5‑7‑5 enforcement, number of s
 
 When strict mode cannot be satisfied after retries, you can choose to use the best attempt, try again, or cancel.
 
-## Data sharing by provider
-
-This extension only sends your staged git diff to the selected AI provider to generate a haiku. Nothing else is transmitted.
-
-- Anthropic: requests are sent to `https://api.anthropic.com/v1/messages`
-- OpenAI: requests are sent to `https://api.openai.com/v1/responses`
-- Gemini: requests are sent to Google AI Studio endpoints (models `...:generateContent`)
-
-Review your chosen provider’s terms and data policies before use.
-
 <details>
   <summary><strong>Project Structure</strong></summary>
 
@@ -256,49 +221,22 @@ Review your chosen provider’s terms and data policies before use.
 
 </details>
 
-## Development
+## Developer docs
 
-1. Clone the repository
-2. Run `pnpm install`
-3. Open in VS Code
-4. Press `F5` to start debugging
-5. Make changes to `src/extension.ts`
-6. Reload the extension window to see changes
+Maintainer-only depth lives in `/docs` so the README can stay user-first:
 
-> For coding agents: follow the streamlined workflow in `AGENTS.md` for install, watch build, validation, and release preflight steps.
-
-## Manual Validation
-
-Run this quick smoke test before publishing or cutting a release tag:
-
-1. `pnpm run release:verify` — runs secret scanning, rebuilds `out/`, and executes `scripts/test-validate.js`.
-2. Launch the Extension Development Host (`F5`) and generate at least one haiku against a staged diff.
-3. Toggle each provider command (Set API Key, Set Provider, Set Model) to confirm prompts and status-bar affordances behave.
-4. Capture a screenshot or short GIF if UI changed; stash it in `media/` for the release notes.
-
-Document your manual steps in the PR or release notes so reviewers can replay them.
-
-## Logging & Diagnostics
-
-- Default runs are quiet. Startup now logs at debug level only, so the output channel stays silent unless you opt in.
-- Enable verbose logs via the `haikuCommit.debug` setting or run "Haiku Commit: Show Logs" to surface the output channel.
-- When collecting diagnostics for a bug, include provider, model, `strict575` value, and whether generation hit retries.
+- Development, manual validation, diagnostics: [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md)
+- Release checklist (packaging/publishing/tagging): [`docs/RELEASE_PREP.md`](docs/RELEASE_PREP.md)
+- Learning guides hub: [`docs/GUIDES.md`](docs/GUIDES.md)
 
 ## Release Prep
 
-- Run `pnpm run release:verify` locally (or in CI) before publishing.
-- Follow the detailed checklist in [`docs/RELEASE_PREP.md`](docs/RELEASE_PREP.md) covering Marketplace packaging, tag pushes, and visibility flips.
-- Verify the README Roadmap and screenshots reflect the current UI, then update Marketplace copy as needed.
+- Run `pnpm run release:verify`.
+- Follow the checklist in [`docs/RELEASE_PREP.md`](docs/RELEASE_PREP.md).
 
 ## Learning Guides
 
-We’re turning this repo into a learning resource alongside the extension. Planned how-to guides will live under `docs/guides/` and cover:
-
-- **First haiku walkthrough:** clone, install, generate, and commit with screenshots.
-- **Provider deep-dive:** swapping Anthropic ↔ OpenAI ↔ Gemini, including rate-limit tips.
-- **Customization recipes:** tweaking strict mode, samples, tone, and upcoming hybrid message options.
-
-Every guide will ship with a matching issue template so contributors can add tutorials or request new ones. If you want to kick-start a guide, open an issue tagged `learning`, sketch the outline, and we’ll pair up on structure and screenshots.
+We keep longer-form guides focused on **how to build VS Code extensions like this one** in [`docs/GUIDES.md`](docs/GUIDES.md) (and future guides under `docs/guides/`).
 
 ## Tips
 
@@ -307,20 +245,15 @@ Every guide will ship with a matching issue template so contributors can add tut
 - Large diffs are automatically truncated to stay within API limits
 - If the haiku doesn't fit, you can always generate a new one!
 
-## Troubleshooting
-
-- No staged changes: Stage files first (e.g., `git add -p`) then rerun.
-- Missing API key: Run "Haiku Commit: Set Haiku API Key" 
-- Rate limits or network errors: The extension retries transient errors with a brief backoff. If failures persist, wait a moment and try again.
-- Non‑git folders: The command only works inside a git repository.
-- View → Output → select "Haiku Commit" to see logs, or run "Haiku Commit: Show Logs" from the Command Palette.
-
 ## Privacy & Security
 
 This extension is designed to keep everything local except the minimum required to generate a haiku.
 
 - Your API key for the selected provider is stored in VS Code Settings on your machine (one of `haikuCommit.anthropicApiKey`, `haikuCommit.openaiApiKey`, or `haikuCommit.geminiApiKey`). It is not committed to this repository.
-- The extension sends your staged git diff to the selected provider’s API (Anthropic, OpenAI, or Gemini) for haiku generation. No other data is transmitted.
+- The extension sends your staged git diff to the selected provider’s API for haiku generation. No other data is transmitted.
+  - Anthropic: `https://api.anthropic.com/v1/messages`
+  - OpenAI: `https://api.openai.com/v1/responses`
+  - Gemini: Google AI Studio endpoints (models `...:generateContent`)
 - No telemetry is collected; the extension does not track usage or send analytics.
 - You can remove the key at any time via Settings or by running “Haiku Commit: Set Haiku API Key” and clearing the value.
 
